@@ -1,0 +1,131 @@
+---
+// No props needed
+---
+
+<div id="settings-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h2>Settings</h2>
+        <div>
+            <label for="common-words">Common Words (lowercase)</label>
+            <p>Words to keep lowercase in title case, separated by commas.</p>
+            <textarea id="common-words"></textarea>
+        </div>
+        <div>
+            <label for="exception-words">Exception Words (case-sensitive)</label
+            >
+            <p>
+                Words to preserve their exact casing (e.g., SSH, npm, AT
+                Protocol), separated by commas.
+            </p>
+            <textarea id="exception-words"></textarea>
+        </div>
+        <button id="save-settings">Save</button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const modal = document.getElementById("settings-modal");
+        const settingsBtn = document.getElementById("settings-btn");
+        const closeBtn = document.querySelector(".close-btn");
+        const saveBtn = document.getElementById("save-settings");
+        const commonWordsTextarea = document.getElementById("common-words");
+        const exceptionWordsTextarea =
+            document.getElementById("exception-words");
+
+        // Open and close modal
+        settingsBtn.addEventListener("click", () => {
+            modal.style.display = "block";
+            loadSettings();
+        });
+
+        closeBtn.addEventListener("click", () => {
+            modal.style.display = "none";
+        });
+
+        window.addEventListener("click", (event) => {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        });
+
+        // Load settings from localStorage or JSON file
+        function loadSettings() {
+            let commonWords = localStorage.getItem("commonWords");
+            let exceptionWords = localStorage.getItem("exceptionWords");
+
+            if (!commonWords || !exceptionWords) {
+                fetch("/exceptions.json")
+                    .then((response) => response.json())
+                    .then((data) => {
+                        commonWordsTextarea.value = data.commonWords.join(",");
+                        exceptionWordsTextarea.value =
+                            data.exceptionWords.join(",");
+                        localStorage.setItem(
+                            "commonWords",
+                            data.commonWords.join(","),
+                        );
+                        localStorage.setItem(
+                            "exceptionWords",
+                            data.exceptionWords.join(","),
+                        );
+                    });
+            } else {
+                commonWordsTextarea.value = commonWords;
+                exceptionWordsTextarea.value = exceptionWords;
+            }
+        }
+
+        // Save settings to localStorage
+        saveBtn.addEventListener("click", () => {
+            localStorage.setItem("commonWords", commonWordsTextarea.value);
+            localStorage.setItem(
+                "exceptionWords",
+                exceptionWordsTextarea.value,
+            );
+            modal.style.display = "none";
+            // Trigger a custom event to notify the CaseConverter component of the changes
+            document.dispatchEvent(new CustomEvent("settingsUpdated"));
+        });
+
+        loadSettings();
+    });
+</script>
+
+<style>
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        color: black;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+    }
+
+    .close-btn {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close-btn:hover,
+    .close-btn:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+</style>
