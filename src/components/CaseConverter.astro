@@ -39,7 +39,7 @@ import SettingsModal from "./SettingsModal.astro";
         <OutputArea label="Title case" id="output-title-case" />
     </div>
     <div id="absolute-title-case" class="tab-content">
-        <OutputArea label="Absolute title" id="output-absolute-title-case" />
+        <OutputArea label="Absolute Title" id="output-absolute-title-case" />
     </div>
     <div id="camel-case" class="tab-content">
         <OutputArea label="Camel case" id="output-camel-case" />
@@ -128,25 +128,51 @@ import SettingsModal from "./SettingsModal.astro";
             return text.replace(regex, "");
         }
 
+        // --- NEW NORMALIZATION FUNCTION ---
+        function normalizeText(str: string): string {
+            // 1. Add space before uppercase letters in camel/pascal case (e.g., "myVar" -> "my Var")
+            // 2. Replace snake, kebab, and dot case delimiters with spaces.
+            // 3. Clean up any resulting multiple spaces.
+            return str
+                .replace(/([a-z])([A-Z])/g, "$1 $2")
+                .replace(/[_\.-]/g, " ")
+                .replace(/\s+/g, " ")
+                .trim();
+        }
+
         function convertText() {
             if (!inputText) return;
             const text = inputText.value;
-            const cleanedText = removeSpecialChars(text);
 
-            setOutputValue("output-sentence-case", toSentenceCase(text));
+            // First, create a normalized, space-separated version of the input.
+            const normalizedText = normalizeText(text);
+
+            // Then, use this normalized text for conversions that rely on word separation.
+            const cleanedText = removeSpecialChars(normalizedText);
+
+            // Note: toLowerCase and toUpperCase can still work on the original text.
             setOutputValue("output-lowercase", text.toLowerCase());
             setOutputValue("output-uppercase", text.toUpperCase());
-            setOutputValue("output-title-case", toTitleCase(text));
+
+            // All other conversions use the normalized or cleaned text.
+            setOutputValue(
+                "output-sentence-case",
+                toSentenceCase(normalizedText),
+            );
+            setOutputValue("output-title-case", toTitleCase(normalizedText));
             setOutputValue(
                 "output-absolute-title-case",
-                toAbsoluteTitleCase(text),
+                toAbsoluteTitleCase(normalizedText),
             );
             setOutputValue("output-camel-case", toCamelCase(cleanedText));
             setOutputValue("output-pascal-case", toPascalCase(cleanedText));
             setOutputValue("output-snake-case", toSnakeCase(cleanedText));
             setOutputValue("output-kebab-case", toKebabCase(cleanedText));
             setOutputValue("output-dot-case", toDotCase(cleanedText));
-            setOutputValue("output-alternating-case", toAlternatingCase(text));
+            setOutputValue(
+                "output-alternating-case",
+                toAlternatingCase(normalizedText),
+            );
         }
 
         function applyExceptions(str: string, exceptions: string[]): string {
@@ -214,28 +240,24 @@ import SettingsModal from "./SettingsModal.astro";
             return str.trim().replace(/\s+/g, ".").toLowerCase();
         }
 
-        // --- FIXED FUNCTION ---
         function toAlternatingCase(str: string): string {
             if (alternatingCaseMode === "character") {
                 let charIndex = 0;
                 return str
                     .split("")
                     .map((char) => {
-                        // Use a regex to check if the character is a letter.
                         if (/[a-zA-Z]/.test(char)) {
                             const result =
                                 charIndex % 2 === 0
                                     ? char.toUpperCase()
                                     : char.toLowerCase();
-                            charIndex++; // Only increment the counter for letters.
+                            charIndex++;
                             return result;
                         }
-                        // Return non-letters (spaces, numbers, symbols) as they are.
                         return char;
                     })
                     .join("");
             }
-            // Word-wise logic is unchanged.
             return str
                 .split(" ")
                 .map((word, i) =>
