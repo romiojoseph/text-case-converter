@@ -1,0 +1,20 @@
+{
+    "commonWords": [
+        "a",
+        "an",
+        "the",
+        "and",
+        "but",
+        "or",
+        "nor",
+        "for",
+        "so",
+        "yet",
+        "in"
+    ],
+    "exceptionWords": [
+        "SSH",
+        "npm",
+        "AT Protocol"
+    ]
+}
