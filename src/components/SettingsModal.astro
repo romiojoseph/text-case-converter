@@ -6,126 +6,142 @@
     <div class="modal-content">
         <span class="close-btn">&times;</span>
         <h2>Settings</h2>
-        <div>
+
+        <div class="settings-group">
             <label for="common-words">Common Words (lowercase)</label>
             <p>Words to keep lowercase in title case, separated by commas.</p>
             <textarea id="common-words"></textarea>
         </div>
-        <div>
+
+        <div class="settings-group">
             <label for="exception-words">Exception Words (case-sensitive)</label
             >
-            <p>
-                Words to preserve their exact casing (e.g., SSH, npm, AT
-                Protocol), separated by commas.
-            </p>
+            <p>Words to preserve their exact casing (e.g., SSH, npm).</p>
             <textarea id="exception-words"></textarea>
         </div>
+
+        <div class="settings-group">
+            <label>
+                <input type="checkbox" id="remove-special-chars-enabled" />
+                Avoid Special Characters
+            </label>
+            <p>
+                Enable this to remove special characters for Camel, Pascal,
+                Snake, and Kebab cases.
+            </p>
+            <textarea
+                id="special-chars-list"
+                placeholder="Enter one character per line, e.g., . , ? !"
+            ></textarea>
+        </div>
+
         <button id="save-settings">Save</button>
     </div>
 </div>
 
 <script>
     document.addEventListener("DOMContentLoaded", () => {
-        const modal = document.getElementById("settings-modal");
+        const modal = document.getElementById(
+            "settings-modal",
+        ) as HTMLElement | null;
         const settingsBtn = document.getElementById("settings-btn");
         const closeBtn = document.querySelector(".close-btn");
         const saveBtn = document.getElementById("save-settings");
-        const commonWordsTextarea = document.getElementById("common-words");
-        const exceptionWordsTextarea =
-            document.getElementById("exception-words");
 
-        // Open and close modal
-        settingsBtn.addEventListener("click", () => {
-            modal.style.display = "block";
-            loadSettings();
-        });
+        const commonWordsTextarea = document.getElementById(
+            "common-words",
+        ) as HTMLTextAreaElement | null;
+        const exceptionWordsTextarea = document.getElementById(
+            "exception-words",
+        ) as HTMLTextAreaElement | null;
+        const removeCharsCheckbox = document.getElementById(
+            "remove-special-chars-enabled",
+        ) as HTMLInputElement | null;
+        const specialCharsTextarea = document.getElementById(
+            "special-chars-list",
+        ) as HTMLTextAreaElement | null;
 
-        closeBtn.addEventListener("click", () => {
-            modal.style.display = "none";
-        });
+        function openModal() {
+            if (modal) {
+                modal.style.display = "block";
+                loadSettings();
+            }
+        }
+        function closeModal() {
+            if (modal) {
+                modal.style.display = "none";
+            }
+        }
 
+        settingsBtn?.addEventListener("click", openModal);
+        closeBtn?.addEventListener("click", closeModal);
         window.addEventListener("click", (event) => {
             if (event.target == modal) {
-                modal.style.display = "none";
+                closeModal();
             }
         });
 
-        // Load settings from localStorage or JSON file
         function loadSettings() {
-            let commonWords = localStorage.getItem("commonWords");
-            let exceptionWords = localStorage.getItem("exceptionWords");
+            if (
+                !commonWordsTextarea ||
+                !exceptionWordsTextarea ||
+                !removeCharsCheckbox ||
+                !specialCharsTextarea
+            )
+                return;
 
-            if (!commonWords || !exceptionWords) {
+            const commonWords = localStorage.getItem("commonWords");
+            const exceptionWords = localStorage.getItem("exceptionWords");
+            const specialChars = localStorage.getItem("specialCharsList");
+
+            // If any of the settings are missing, fetch all from JSON
+            if (!commonWords || !exceptionWords || !specialChars) {
                 fetch("/exceptions.json")
                     .then((response) => response.json())
                     .then((data) => {
                         commonWordsTextarea.value = data.commonWords.join(",");
                         exceptionWordsTextarea.value =
                             data.exceptionWords.join(",");
-                        localStorage.setItem(
-                            "commonWords",
-                            data.commonWords.join(","),
-                        );
-                        localStorage.setItem(
-                            "exceptionWords",
-                            data.exceptionWords.join(","),
-                        );
+                        specialCharsTextarea.value =
+                            data.specialCharacters.join("\n"); // Populate from JSON
                     });
             } else {
                 commonWordsTextarea.value = commonWords;
                 exceptionWordsTextarea.value = exceptionWords;
+                specialCharsTextarea.value = specialChars;
             }
+
+            removeCharsCheckbox.checked =
+                localStorage.getItem("removeSpecialCharsEnabled") === "true";
         }
 
-        // Save settings to localStorage
-        saveBtn.addEventListener("click", () => {
+        saveBtn?.addEventListener("click", () => {
+            if (
+                !commonWordsTextarea ||
+                !exceptionWordsTextarea ||
+                !removeCharsCheckbox ||
+                !specialCharsTextarea
+            )
+                return;
+
             localStorage.setItem("commonWords", commonWordsTextarea.value);
             localStorage.setItem(
                 "exceptionWords",
                 exceptionWordsTextarea.value,
             );
-            modal.style.display = "none";
-            // Trigger a custom event to notify the CaseConverter component of the changes
+            localStorage.setItem(
+                "removeSpecialCharsEnabled",
+                String(removeCharsCheckbox.checked),
+            );
+            localStorage.setItem(
+                "specialCharsList",
+                specialCharsTextarea.value,
+            );
+
+            closeModal();
             document.dispatchEvent(new CustomEvent("settingsUpdated"));
         });
 
         loadSettings();
     });
 </script>
-
-<style>
-    .modal {
-        display: none;
-        position: fixed;
-        z-index: 1;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        overflow: auto;
-        background-color: rgba(0, 0, 0, 0.4);
-    }
-
-    .modal-content {
-        background-color: #fefefe;
-        color: black;
-        margin: 15% auto;
-        padding: 20px;
-        border: 1px solid #888;
-        width: 80%;
-    }
-
-    .close-btn {
-        color: #aaa;
-        float: right;
-        font-size: 28px;
-        font-weight: bold;
-    }
-
-    .close-btn:hover,
-    .close-btn:focus {
-        color: black;
-        text-decoration: none;
-        cursor: pointer;
-    }
-</style>

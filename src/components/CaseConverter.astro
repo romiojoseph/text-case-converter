@@ -5,8 +5,9 @@ import SettingsModal from "./SettingsModal.astro";
 ---
 
 <div class="case-converter">
-    <InputArea />
     <button id="settings-btn">Settings</button>
+    <InputArea />
+
     <div class="tabs">
         <button class="tab-link active" data-tab="sentence-case"
             >Sentence case</button
@@ -56,88 +57,94 @@ import SettingsModal from "./SettingsModal.astro";
 
 <script>
     document.addEventListener("DOMContentLoaded", () => {
-        const inputText = document.getElementById("input-text");
+        const inputText = document.getElementById(
+            "input-text",
+        ) as HTMLTextAreaElement | null;
         const tabs = document.querySelectorAll(".tab-link");
         const tabContents = document.querySelectorAll(".tab-content");
 
-        let commonWords = [];
-        let exceptionWords = [];
+        let commonWords: string[] = [];
+        let exceptionWords: string[] = [];
+        let removeSpecialCharsEnabled = false;
+        let specialCharsList: string[] = [];
+
+        function setOutputValue(id: string, value: string) {
+            const element = document.getElementById(
+                id,
+            ) as HTMLTextAreaElement | null;
+            if (element) {
+                element.value = value;
+            }
+        }
 
         function loadSettings() {
             commonWords = (localStorage.getItem("commonWords") || "")
                 .split(",")
+                .map((w) => w.trim())
                 .filter(Boolean);
             exceptionWords = (localStorage.getItem("exceptionWords") || "")
                 .split(",")
+                .map((w) => w.trim())
+                .filter(Boolean);
+            removeSpecialCharsEnabled =
+                localStorage.getItem("removeSpecialCharsEnabled") === "true";
+            specialCharsList = (localStorage.getItem("specialCharsList") || "")
+                .split("\n")
                 .filter(Boolean);
         }
 
-        loadSettings();
-
-        // Listen for settings updates
-        document.addEventListener("settingsUpdated", () => {
-            loadSettings();
-            convertText();
-        });
-
-        function convertText() {
-            const text = inputText.value;
-
-            // Sentence case
-            document.getElementById("output-sentence-case").value =
-                toSentenceCase(text);
-
-            // Lower case
-            document.getElementById("output-lowercase").value =
-                text.toLowerCase();
-
-            // Uppercase
-            document.getElementById("output-uppercase").value =
-                text.toUpperCase();
-
-            // Title case
-            document.getElementById("output-title-case").value =
-                toTitleCase(text);
-
-            // Absolute Title case
-            document.getElementById("output-absolute-title-case").value =
-                toAbsoluteTitleCase(text);
-
-            // Camel case
-            document.getElementById("output-camel-case").value =
-                toCamelCase(text);
-
-            // Pascal case
-            document.getElementById("output-pascal-case").value =
-                toPascalCase(text);
-
-            // Snake case
-            document.getElementById("output-snake-case").value =
-                toSnakeCase(text);
-
-            // Kebab case
-            document.getElementById("output-kebab-case").value =
-                toKebabCase(text);
+        function removeSpecialChars(text: string): string {
+            if (!removeSpecialCharsEnabled || specialCharsList.length === 0) {
+                return text;
+            }
+            const escapedChars = specialCharsList
+                .map((char) => char.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+                .join("");
+            const regex = new RegExp(`[${escapedChars}]`, "g");
+            return text.replace(regex, "");
         }
 
-        // Conversion functions
-        function toSentenceCase(str) {
-            const sentences = str.toLowerCase().split(". ");
-            const result = sentences
-                .map((sentence) => {
-                    const trimmed = sentence.trim();
-                    if (trimmed.length === 0) return "";
-                    const firstChar = trimmed.charAt(0).toUpperCase();
-                    const rest = trimmed.slice(1);
-                    return `${firstChar}${rest}`;
-                })
-                .join(". ");
+        function convertText() {
+            if (!inputText) return;
+            const text = inputText.value;
+            const cleanedText = removeSpecialChars(text);
+
+            setOutputValue("output-sentence-case", toSentenceCase(text));
+            setOutputValue("output-lowercase", text.toLowerCase());
+            setOutputValue("output-uppercase", text.toUpperCase());
+            setOutputValue("output-title-case", toTitleCase(text));
+            setOutputValue(
+                "output-absolute-title-case",
+                toAbsoluteTitleCase(text),
+            );
+            setOutputValue("output-camel-case", toCamelCase(cleanedText));
+            setOutputValue("output-pascal-case", toPascalCase(cleanedText));
+            setOutputValue("output-snake-case", toSnakeCase(cleanedText));
+            setOutputValue("output-kebab-case", toKebabCase(cleanedText));
+        }
+
+        // --- All Conversion Functions ---
+
+        function applyExceptions(str: string, exceptions: string[]): string {
+            let tempStr = str;
+            exceptions.forEach((exception) => {
+                const regex = new RegExp(`\\b${exception}\\b`, "gi");
+                tempStr = tempStr.replace(regex, exception);
+            });
+            return tempStr;
+        }
+
+        function toSentenceCase(str: string): string {
+            const result = str
+                .toLowerCase()
+                .replace(/(^\s*\w|[.!?]\s*\w)/g, (c) => c.toUpperCase());
             return applyExceptions(result, exceptionWords);
         }
 
-        function toTitleCase(str) {
-            const words = str.toLowerCase().split(" ");
-            const result = words
+        function toTitleCase(str: string): string {
+            const result = str
+                .toLowerCase()
+                .split(" ")
                 .map((word, index) => {
                     if (index > 0 && commonWords.includes(word)) {
                         return word;
@@ -148,7 +155,7 @@ import SettingsModal from "./SettingsModal.astro";
             return applyExceptions(result, exceptionWords);
         }
 
-        function toAbsoluteTitleCase(str) {
+        function toAbsoluteTitleCase(str: string): string {
             return str
                 .toLowerCase()
                 .split(" ")
@@ -156,7 +163,7 @@ import SettingsModal from "./SettingsModal.astro";
                 .join(" ");
         }
 
-        function toCamelCase(str) {
+        function toCamelCase(str: string): string {
             return str
                 .replace(/(?:^\w|[A-Z]|\b\w)/g, (word, index) =>
                     index === 0 ? word.toLowerCase() : word.toUpperCase(),
@@ -164,72 +171,44 @@ import SettingsModal from "./SettingsModal.astro";
                 .replace(/\s+/g, "");
         }
 
-        function toPascalCase(str) {
+        function toPascalCase(str: string): string {
             return str
                 .replace(/(?:^\w|[A-Z]|\b\w)/g, (word) => word.toUpperCase())
                 .replace(/\s+/g, "");
         }
 
-        function toSnakeCase(str) {
-            return str.replace(/\s+/g, "_").toLowerCase();
+        function toSnakeCase(str: string): string {
+            return str.trim().replace(/\s+/g, "_").toLowerCase();
         }
 
-        function toKebabCase(str) {
-            return str.replace(/\s+/g, "-").toLowerCase();
+        function toKebabCase(str: string): string {
+            return str.trim().replace(/\s+/g, "-").toLowerCase();
         }
 
-        function applyExceptions(str, exceptions) {
-            exceptions.forEach((exception) => {
-                const regex = new RegExp(`\\b${exception}\\b`, "gi");
-                str = str.replace(regex, exception);
-            });
-            return str;
-        }
+        // --- Event Listeners ---
 
-        // Initial conversion and event listener
+        loadSettings();
         convertText();
-        inputText.addEventListener("input", convertText);
 
-        // Tab functionality
+        inputText?.addEventListener("input", convertText);
+        document.addEventListener("settingsUpdated", () => {
+            loadSettings();
+            convertText();
+        });
+
         tabs.forEach((tab) => {
             tab.addEventListener("click", () => {
-                const target = document.getElementById(
-                    tab.getAttribute("data-tab"),
-                );
+                const targetId = tab.getAttribute("data-tab");
+                if (!targetId) return;
+
+                const target = document.getElementById(targetId);
 
                 tabs.forEach((t) => t.classList.remove("active"));
                 tabContents.forEach((tc) => tc.classList.remove("active"));
 
                 tab.classList.add("active");
-                target.classList.add("active");
+                target?.classList.add("active");
             });
         });
     });
 </script>
-
-<style>
-    .tabs {
-        display: flex;
-        margin-bottom: 20px;
-    }
-
-    .tab-link {
-        padding: 10px 20px;
-        cursor: pointer;
-        border: 1px solid #ccc;
-        background-color: #f1f1f1;
-        color: black;
-    }
-
-    .tab-link.active {
-        background-color: #ddd;
-    }
-
-    .tab-content {
-        display: none;
-    }
-
-    .tab-content.active {
-        display: block;
-    }
-</style>
