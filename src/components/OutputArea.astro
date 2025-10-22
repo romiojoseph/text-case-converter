@@ -9,15 +9,17 @@ const counterId = `${id}-counter`;
 ---
 
 <div class="output-area">
-    <label for={id}>{label}</label>
+    <div class="div-wrapper">
+        <label for={id}>{label}</label>
+        <button class="copy-btn" data-target={id}
+            ><i class="ph-fill ph-copy-simple"></i>Copy</button
+        >
+    </div>
     <div class="output-wrapper">
         <textarea id={id} readonly></textarea>
     </div>
     <div class="div-wrapper">
         <div id={counterId} class="counter-info">Characters: 0, Words: 0</div>
-        <button class="copy-btn" data-target={id}
-            ><i class="ph-fill ph-copy-simple"></i>Copy</button
-        >
     </div>
 </div>
 

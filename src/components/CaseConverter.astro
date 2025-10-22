@@ -5,8 +5,6 @@ import SettingsModal from "./SettingsModal.astro";
 ---
 
 <div class="case-converter">
-    <InputArea />
-
     <div class="tabs">
         <button class="tab-link active" data-tab="sentence-case"
             >Sentence</button
@@ -25,6 +23,8 @@ import SettingsModal from "./SettingsModal.astro";
         <button class="tab-link" data-tab="alternating-case">Alternating</button
         >
     </div>
+
+    <InputArea />
 
     <div id="sentence-case" class="tab-content active">
         <OutputArea label="Sentence case" id="output-sentence-case" />

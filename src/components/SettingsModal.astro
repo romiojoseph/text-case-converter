@@ -4,49 +4,72 @@
 
 <div id="settings-modal" class="modal">
     <div class="modal-content">
-        <span class="close-btn">&times;</span>
-        <h2>Settings</h2>
+        <header>
+            <h2>Settings</h2>
+            <button id="save-settings">Save</button>
+        </header>
 
-        <div class="settings-group">
-            <label for="common-words">Common Words (lowercase)</label>
-            <p>Words to keep lowercase in title case, separated by commas.</p>
-            <textarea id="common-words"></textarea>
-        </div>
+        <div class="settings-grid">
+            <div class="settings-group">
+                <label for="common-words">Common Words (lowercase)</label>
+                <aside>
+                    Words to keep lowercase in title case, separated by commas.
+                </aside>
+                <textarea id="common-words"></textarea>
+            </div>
 
-        <div class="settings-group">
-            <label for="exception-words">Exception Words (case-sensitive)</label
-            >
-            <p>Words to preserve their exact casing (e.g., SSH, npm).</p>
-            <textarea id="exception-words"></textarea>
-        </div>
-
-        <div class="settings-group">
-            <label>
-                <input type="checkbox" id="remove-special-chars-enabled" />
-                Avoid Special Characters
-            </label>
-            <p>
-                Enable to remove characters below for Camel, Pascal, Snake,
-                Kebab, and Dot cases.
-            </p>
-            <textarea
-                id="special-chars-list"
-                placeholder="Enter one character per line, e.g., . , ? !"
-            ></textarea>
-        </div>
-
-        <div class="settings-group">
-            <label for="alternating-case-mode">Alternating Case Mode</label>
-            <p>Choose how alternating case is applied.</p>
-            <select id="alternating-case-mode">
-                <option value="word">Word-wise (An EASY to USE title)</option>
-                <option value="character"
-                    >Character-wise (An EaSy To UsE TiTlE)</option
+            <div class="settings-group">
+                <label for="exception-words"
+                    >Exception Words (case-sensitive)</label
                 >
-            </select>
-        </div>
+                <aside>
+                    Words to preserve their exact casing (e.g., SSH, npm).
+                </aside>
+                <textarea id="exception-words"></textarea>
+            </div>
 
-        <button id="save-settings">Save</button>
+            <div class="settings-group">
+                <label>
+                    <input type="checkbox" id="remove-special-chars-enabled" />
+                    Avoid Special Characters
+                </label>
+                <aside>
+                    To remove characters below for Camel, Pascal, Snake, Kebab,
+                    and Dot cases.
+                </aside>
+                <textarea
+                    id="special-chars-list"
+                    placeholder="Enter one character per line, e.g., . , ? !"
+                ></textarea>
+            </div>
+            <div class="settings-group">
+                <label for="alternating-case-mode">Alternating Case Mode</label>
+                <aside>Choose how alternating case is applied.</aside>
+                <div id="alternating-case-mode" class="radio-group">
+                    <label>
+                        <input
+                            type="radio"
+                            name="alternating-case-mode"
+                            value="word"
+                            checked
+                        />
+                        Word-wise <span class="hint"
+                            >(An EASY to USE title)</span
+                        >
+                    </label>
+                    <label>
+                        <input
+                            type="radio"
+                            name="alternating-case-mode"
+                            value="character"
+                        />
+                        Character-wise <span class="hint"
+                            >(An EaSy To UsE TiTlE)</span
+                        >
+                    </label>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
