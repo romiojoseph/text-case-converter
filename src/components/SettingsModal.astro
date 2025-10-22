@@ -45,7 +45,7 @@
             <div class="settings-group">
                 <label for="alternating-case-mode">Alternating Case Mode</label>
                 <aside>Choose how alternating case is applied.</aside>
-                <div id="alternating-case-mode" class="radio-group">
+                <div id="alternating-case-mode-group" class="radio-group">
                     <label>
                         <input
                             type="radio"
@@ -79,6 +79,8 @@
             "settings-modal",
         ) as HTMLElement | null;
         const settingsBtn = document.getElementById("settings-btn");
+        // NOTE: Your new HTML doesn't have a ".close-btn", so this will be null.
+        // Assuming you have a way to close the modal or will add the button back.
         const closeBtn = document.querySelector(
             ".close-btn",
         ) as HTMLElement | null;
@@ -96,9 +98,9 @@
         const specialCharsTextarea = document.getElementById(
             "special-chars-list",
         ) as HTMLTextAreaElement | null;
-        const alternatingCaseSelect = document.getElementById(
-            "alternating-case-mode",
-        ) as HTMLSelectElement | null;
+
+        // This function is now removed as it was incorrect.
+        // const alternatingCaseSelect = ...
 
         function openModal() {
             if (modal) {
@@ -125,8 +127,7 @@
                 !commonWordsTextarea ||
                 !exceptionWordsTextarea ||
                 !removeCharsCheckbox ||
-                !specialCharsTextarea ||
-                !alternatingCaseSelect
+                !specialCharsTextarea
             )
                 return;
 
@@ -152,8 +153,16 @@
 
             removeCharsCheckbox.checked =
                 localStorage.getItem("removeSpecialCharsEnabled") === "true";
-            alternatingCaseSelect.value =
+
+            // --- CORRECTED LOGIC FOR LOADING RADIO BUTTONS ---
+            const savedMode =
                 localStorage.getItem("alternatingCaseMode") || "word";
+            const radioToCheck = document.querySelector(
+                `input[name="alternating-case-mode"][value="${savedMode}"]`,
+            ) as HTMLInputElement | null;
+            if (radioToCheck) {
+                radioToCheck.checked = true;
+            }
         }
 
         saveBtn?.addEventListener("click", () => {
@@ -161,8 +170,7 @@
                 !commonWordsTextarea ||
                 !exceptionWordsTextarea ||
                 !removeCharsCheckbox ||
-                !specialCharsTextarea ||
-                !alternatingCaseSelect
+                !specialCharsTextarea
             )
                 return;
 
@@ -179,10 +187,14 @@
                 "specialCharsList",
                 specialCharsTextarea.value,
             );
-            localStorage.setItem(
-                "alternatingCaseMode",
-                alternatingCaseSelect.value,
-            );
+
+            // --- CORRECTED LOGIC FOR SAVING RADIO BUTTONS ---
+            const checkedRadio = document.querySelector(
+                'input[name="alternating-case-mode"]:checked',
+            ) as HTMLInputElement | null;
+            if (checkedRadio) {
+                localStorage.setItem("alternatingCaseMode", checkedRadio.value);
+            }
 
             closeModal();
             document.dispatchEvent(new CustomEvent("settingsUpdated"));

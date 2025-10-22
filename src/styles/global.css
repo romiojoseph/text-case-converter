@@ -238,7 +238,7 @@ select {
 }
 
 #clear-btn {
-    color: var(--error-color);
+    color: var(--auraDark-16);
     border: none;
     padding: 0;
     cursor: pointer;
@@ -249,10 +249,15 @@ select {
     gap: 6px;
     font-size: var(--font-size-caption);
     border-radius: 0;
+    transition: color .24s ease-in-out;
+}
+
+#clear-btn:hover {
+    color: var(--error-color);
 }
 
 .copy-btn {
-    background-color: var(--success-color);
+    background-color: var(--info-color);
     color: var(--auraDark-1);
     border: none;
     padding: 8px 16px;
@@ -267,7 +272,7 @@ select {
 
 .copy-btn:hover {
     transform: scale(1.03) translateX(-1px);
-    box-shadow: 0 0px 8px 2px rgb(166, 204, 179);
+    box-shadow: 0 0px 8px 2px rgb(209, 219, 236);
 }
 
 
@@ -443,19 +448,24 @@ select {
 /* 5. Copy Notification */
 #copy-notification {
     position: fixed;
-    bottom: 20px;
-    right: -300px;
+    bottom: 24px;
+    right: 24px;
     background-color: var(--success-color);
     color: white;
-    padding: 15px 20px;
-    border-radius: 6px;
+    padding: 16px 32px;
+    border-radius: 12px;
     z-index: 1001;
-    transition: right 0.5s ease-in-out;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0 16px 4px rgb(217, 243, 211);
+
+    /* smoother animation */
+    transform: translateX(120%);
+    opacity: 0;
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
 }
 
 #copy-notification.show {
-    right: 20px;
+    transform: translateX(0);
+    opacity: 1;
 }
 
 
