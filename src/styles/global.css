@@ -259,6 +259,7 @@ button {
     cursor: pointer;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
     font-size: var(--font-size-tagline);
     border-radius: 100px;
@@ -275,7 +276,7 @@ button {
 #save-settings {
     background-color: var(--info-color);
     color: var(--auraDark-1);
-    padding: 8px 24px;
+    padding: 8px 16px;
     border-radius: 100px;
     border: none;
     cursor: pointer;
@@ -284,6 +285,10 @@ button {
     font-weight: 600;
     width: fit-content;
     transition: transform 0.25s ease, box-shadow 0.25s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: center;
 }
 
 #save-settings:hover {
@@ -379,7 +384,7 @@ button {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 8px;
+    gap: 4px;
     margin: 0 0 16px;
     background-color: var(--auraDark-3);
     padding: 2px;
@@ -539,6 +544,12 @@ button {
         font-size: var(--font-size-subtitle);
     }
 
+    .output-area label {
+        font-size: var(--font-size-body);
+        font-weight: 600;
+    }
+
+
     header {
         align-items: center;
         gap: 16px;
@@ -559,7 +570,7 @@ button {
         padding: 16px;
     }
 
-    .modal {
+    .modal.show {
         align-items: flex-end;
         display: flex;
         justify-content: center;
