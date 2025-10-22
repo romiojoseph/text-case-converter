@@ -28,8 +28,51 @@ const counterId = `${id}-counter`;
         const copyBtns = document.querySelectorAll(".copy-btn");
         const notification = document.getElementById("copy-notification");
 
+        /**
+         * A more robust cross-browser copy function.
+         * Tries the modern Clipboard API first, then falls back to a temporary textarea.
+         * @param {string} text The text to copy to the clipboard.
+         * @returns {Promise<boolean>} A promise that resolves to true if successful, false otherwise.
+         */
+        async function copyToClipboard(text: string): Promise<boolean> {
+            // 1. Try the modern Clipboard API (navigator.clipboard)
+            if (navigator.clipboard) {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    return true;
+                } catch (err) {
+                    console.error("Clipboard API failed, falling back.", err);
+                    // If it fails, we proceed to the fallback.
+                }
+            }
+
+            // 2. Fallback for older browsers or insecure contexts
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+
+            // Make the textarea invisible and non-disruptive
+            textArea.style.position = "fixed";
+            textArea.style.top = "-9999px";
+            textArea.style.left = "-9999px";
+
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            let success = false;
+            try {
+                // execCommand is deprecated but necessary for the fallback
+                success = document.execCommand("copy");
+            } catch (err) {
+                console.error("Fallback execCommand failed.", err);
+            }
+
+            document.body.removeChild(textArea);
+            return success;
+        }
+
         copyBtns.forEach((btn) => {
-            btn.addEventListener("click", () => {
+            btn.addEventListener("click", async () => {
                 const targetId = btn.getAttribute("data-target");
                 if (!targetId) return;
 
@@ -37,16 +80,15 @@ const counterId = `${id}-counter`;
                     targetId,
                 ) as HTMLTextAreaElement | null;
 
-                if (outputText && typeof outputText.select === "function") {
-                    outputText.select();
-                    navigator.clipboard.writeText(outputText.value).then(() => {
-                        if (notification) {
-                            notification.classList.add("show");
-                            setTimeout(() => {
-                                notification.classList.remove("show");
-                            }, 2000);
-                        }
-                    });
+                if (outputText && outputText.value) {
+                    const success = await copyToClipboard(outputText.value);
+
+                    if (success && notification) {
+                        notification.classList.add("show");
+                        setTimeout(() => {
+                            notification.classList.remove("show");
+                        }, 2000);
+                    }
                 }
             });
         });

@@ -11,7 +11,10 @@
 
         <div class="settings-grid">
             <div class="settings-group">
-                <label for="common-words">Common Words (lowercase)</label>
+                <label>
+                    <input type="checkbox" id="common-words-enabled" />
+                    Common Words (lowercase)
+                </label>
                 <aside>
                     Words to keep lowercase in title case, separated by commas.
                 </aside>
@@ -19,9 +22,10 @@
             </div>
 
             <div class="settings-group">
-                <label for="exception-words"
-                    >Exception Words (case-sensitive)</label
-                >
+                <label>
+                    <input type="checkbox" id="exception-words-enabled" />
+                    Exception Words (case-sensitive)
+                </label>
                 <aside>
                     Words to preserve their exact casing (e.g., SSH, npm).
                 </aside>
@@ -53,9 +57,7 @@
                             value="word"
                             checked
                         />
-                        Word-wise <span class="hint"
-                            >(An EASY to USE title)</span
-                        >
+                        Word-wise <span class="hint">(DARK knight)</span>
                     </label>
                     <label>
                         <input
@@ -63,9 +65,7 @@
                             name="alternating-case-mode"
                             value="character"
                         />
-                        Character-wise <span class="hint"
-                            >(An EaSy To UsE TiTlE)</span
-                        >
+                        Character-wise <span class="hint">(DaRk KnIgHt)</span>
                     </label>
                 </div>
             </div>
@@ -79,16 +79,20 @@
             "settings-modal",
         ) as HTMLElement | null;
         const settingsBtn = document.getElementById("settings-btn");
-        // NOTE: Your new HTML doesn't have a ".close-btn", so this will be null.
-        // Assuming you have a way to close the modal or will add the button back.
         const closeBtn = document.querySelector(
             ".close-btn",
         ) as HTMLElement | null;
         const saveBtn = document.getElementById("save-settings");
 
+        const commonWordsCheckbox = document.getElementById(
+            "common-words-enabled",
+        ) as HTMLInputElement | null;
         const commonWordsTextarea = document.getElementById(
             "common-words",
         ) as HTMLTextAreaElement | null;
+        const exceptionWordsCheckbox = document.getElementById(
+            "exception-words-enabled",
+        ) as HTMLInputElement | null;
         const exceptionWordsTextarea = document.getElementById(
             "exception-words",
         ) as HTMLTextAreaElement | null;
@@ -98,9 +102,6 @@
         const specialCharsTextarea = document.getElementById(
             "special-chars-list",
         ) as HTMLTextAreaElement | null;
-
-        // This function is now removed as it was incorrect.
-        // const alternatingCaseSelect = ...
 
         function openModal() {
             if (modal) {
@@ -127,7 +128,9 @@
                 !commonWordsTextarea ||
                 !exceptionWordsTextarea ||
                 !removeCharsCheckbox ||
-                !specialCharsTextarea
+                !specialCharsTextarea ||
+                !commonWordsCheckbox ||
+                !exceptionWordsCheckbox
             )
                 return;
 
@@ -151,10 +154,14 @@
                 specialCharsTextarea.value = specialChars;
             }
 
+            // Default to 'true' (checked) if the setting doesn't exist yet
+            commonWordsCheckbox.checked =
+                localStorage.getItem("commonWordsEnabled") !== "false";
+            exceptionWordsCheckbox.checked =
+                localStorage.getItem("exceptionWordsEnabled") !== "false";
             removeCharsCheckbox.checked =
                 localStorage.getItem("removeSpecialCharsEnabled") === "true";
 
-            // --- CORRECTED LOGIC FOR LOADING RADIO BUTTONS ---
             const savedMode =
                 localStorage.getItem("alternatingCaseMode") || "word";
             const radioToCheck = document.querySelector(
@@ -170,11 +177,21 @@
                 !commonWordsTextarea ||
                 !exceptionWordsTextarea ||
                 !removeCharsCheckbox ||
-                !specialCharsTextarea
+                !specialCharsTextarea ||
+                !commonWordsCheckbox ||
+                !exceptionWordsCheckbox
             )
                 return;
 
+            localStorage.setItem(
+                "commonWordsEnabled",
+                String(commonWordsCheckbox.checked),
+            );
             localStorage.setItem("commonWords", commonWordsTextarea.value);
+            localStorage.setItem(
+                "exceptionWordsEnabled",
+                String(exceptionWordsCheckbox.checked),
+            );
             localStorage.setItem(
                 "exceptionWords",
                 exceptionWordsTextarea.value,
@@ -188,7 +205,6 @@
                 specialCharsTextarea.value,
             );
 
-            // --- CORRECTED LOGIC FOR SAVING RADIO BUTTONS ---
             const checkedRadio = document.querySelector(
                 'input[name="alternating-case-mode"]:checked',
             ) as HTMLInputElement | null;

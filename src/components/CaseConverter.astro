@@ -72,7 +72,9 @@ import SettingsModal from "./SettingsModal.astro";
         const tabContents = document.querySelectorAll(".tab-content");
 
         let commonWords: string[] = [];
+        let commonWordsEnabled = true;
         let exceptionWords: string[] = [];
+        let exceptionWordsEnabled = true;
         let removeSpecialCharsEnabled = false;
         let specialCharsList: string[] = [];
         let alternatingCaseMode = "word";
@@ -100,14 +102,20 @@ import SettingsModal from "./SettingsModal.astro";
         }
 
         function loadSettings() {
+            commonWordsEnabled =
+                localStorage.getItem("commonWordsEnabled") !== "false";
             commonWords = (localStorage.getItem("commonWords") || "")
                 .split(",")
                 .map((w) => w.trim())
                 .filter(Boolean);
+
+            exceptionWordsEnabled =
+                localStorage.getItem("exceptionWordsEnabled") !== "false";
             exceptionWords = (localStorage.getItem("exceptionWords") || "")
                 .split(",")
                 .map((w) => w.trim())
                 .filter(Boolean);
+
             removeSpecialCharsEnabled =
                 localStorage.getItem("removeSpecialCharsEnabled") === "true";
             specialCharsList = (localStorage.getItem("specialCharsList") || "")
@@ -128,11 +136,7 @@ import SettingsModal from "./SettingsModal.astro";
             return text.replace(regex, "");
         }
 
-        // --- NEW NORMALIZATION FUNCTION ---
         function normalizeText(str: string): string {
-            // 1. Add space before uppercase letters in camel/pascal case (e.g., "myVar" -> "my Var")
-            // 2. Replace snake, kebab, and dot case delimiters with spaces.
-            // 3. Clean up any resulting multiple spaces.
             return str
                 .replace(/([a-z])([A-Z])/g, "$1 $2")
                 .replace(/[_\.-]/g, " ")
@@ -143,18 +147,12 @@ import SettingsModal from "./SettingsModal.astro";
         function convertText() {
             if (!inputText) return;
             const text = inputText.value;
-
-            // First, create a normalized, space-separated version of the input.
             const normalizedText = normalizeText(text);
-
-            // Then, use this normalized text for conversions that rely on word separation.
             const cleanedText = removeSpecialChars(normalizedText);
 
-            // Note: toLowerCase and toUpperCase can still work on the original text.
             setOutputValue("output-lowercase", text.toLowerCase());
             setOutputValue("output-uppercase", text.toUpperCase());
 
-            // All other conversions use the normalized or cleaned text.
             setOutputValue(
                 "output-sentence-case",
                 toSentenceCase(normalizedText),
@@ -176,6 +174,10 @@ import SettingsModal from "./SettingsModal.astro";
         }
 
         function applyExceptions(str: string, exceptions: string[]): string {
+            // Only apply if the setting is enabled
+            if (!exceptionWordsEnabled) {
+                return str;
+            }
             let tempStr = str;
             exceptions.forEach((exception) => {
                 const regex = new RegExp(`\\b${exception}\\b`, "gi");
@@ -196,7 +198,12 @@ import SettingsModal from "./SettingsModal.astro";
                 .toLowerCase()
                 .split(" ")
                 .map((word, index) => {
-                    if (index > 0 && commonWords.includes(word)) {
+                    // Only apply if the setting is enabled
+                    if (
+                        commonWordsEnabled &&
+                        index > 0 &&
+                        commonWords.includes(word)
+                    ) {
                         return word;
                     }
                     return word.charAt(0).toUpperCase() + word.slice(1);
