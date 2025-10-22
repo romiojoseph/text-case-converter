@@ -26,13 +26,24 @@
                 Avoid Special Characters
             </label>
             <p>
-                Enable this to remove special characters for Camel, Pascal,
-                Snake, and Kebab cases.
+                Enable to remove characters below for Camel, Pascal, Snake,
+                Kebab, and Dot cases.
             </p>
             <textarea
                 id="special-chars-list"
                 placeholder="Enter one character per line, e.g., . , ? !"
             ></textarea>
+        </div>
+
+        <div class="settings-group">
+            <label for="alternating-case-mode">Alternating Case Mode</label>
+            <p>Choose how alternating case is applied.</p>
+            <select id="alternating-case-mode">
+                <option value="word">Word-wise (An EASY to USE title)</option>
+                <option value="character"
+                    >Character-wise (An EaSy To UsE TiTlE)</option
+                >
+            </select>
         </div>
 
         <button id="save-settings">Save</button>
@@ -45,7 +56,9 @@
             "settings-modal",
         ) as HTMLElement | null;
         const settingsBtn = document.getElementById("settings-btn");
-        const closeBtn = document.querySelector(".close-btn");
+        const closeBtn = document.querySelector(
+            ".close-btn",
+        ) as HTMLElement | null;
         const saveBtn = document.getElementById("save-settings");
 
         const commonWordsTextarea = document.getElementById(
@@ -60,6 +73,9 @@
         const specialCharsTextarea = document.getElementById(
             "special-chars-list",
         ) as HTMLTextAreaElement | null;
+        const alternatingCaseSelect = document.getElementById(
+            "alternating-case-mode",
+        ) as HTMLSelectElement | null;
 
         function openModal() {
             if (modal) {
@@ -86,7 +102,8 @@
                 !commonWordsTextarea ||
                 !exceptionWordsTextarea ||
                 !removeCharsCheckbox ||
-                !specialCharsTextarea
+                !specialCharsTextarea ||
+                !alternatingCaseSelect
             )
                 return;
 
@@ -94,7 +111,6 @@
             const exceptionWords = localStorage.getItem("exceptionWords");
             const specialChars = localStorage.getItem("specialCharsList");
 
-            // If any of the settings are missing, fetch all from JSON
             if (!commonWords || !exceptionWords || !specialChars) {
                 fetch("/exceptions.json")
                     .then((response) => response.json())
@@ -103,7 +119,7 @@
                         exceptionWordsTextarea.value =
                             data.exceptionWords.join(",");
                         specialCharsTextarea.value =
-                            data.specialCharacters.join("\n"); // Populate from JSON
+                            data.specialCharacters.join("\n");
                     });
             } else {
                 commonWordsTextarea.value = commonWords;
@@ -113,6 +129,8 @@
 
             removeCharsCheckbox.checked =
                 localStorage.getItem("removeSpecialCharsEnabled") === "true";
+            alternatingCaseSelect.value =
+                localStorage.getItem("alternatingCaseMode") || "word";
         }
 
         saveBtn?.addEventListener("click", () => {
@@ -120,7 +138,8 @@
                 !commonWordsTextarea ||
                 !exceptionWordsTextarea ||
                 !removeCharsCheckbox ||
-                !specialCharsTextarea
+                !specialCharsTextarea ||
+                !alternatingCaseSelect
             )
                 return;
 
@@ -136,6 +155,10 @@
             localStorage.setItem(
                 "specialCharsList",
                 specialCharsTextarea.value,
+            );
+            localStorage.setItem(
+                "alternatingCaseMode",
+                alternatingCaseSelect.value,
             );
 
             closeModal();

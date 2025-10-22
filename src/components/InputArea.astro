@@ -4,28 +4,46 @@
 
 <div class="input-area">
     <textarea id="input-text" placeholder="Enter your text here..."></textarea>
+    <div id="input-counter" class="counter-info">Characters: 0, Words: 0</div>
     <button id="clear-btn">Clear</button>
 </div>
 
 <script>
+    // Helper function to calculate and update counter
+    function updateCounter(text: string, counterElement: HTMLElement | null) {
+        if (!counterElement) return;
+        const charCount = text.length;
+        // An empty string or just whitespace should result in 0 words.
+        const wordCount =
+            text.trim() === "" ? 0 : text.trim().split(/\s+/).length;
+        counterElement.textContent = `Characters: ${charCount}, Words: ${wordCount}`;
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
         const inputText = document.getElementById(
             "input-text",
-        ) as HTMLTextAreaElement;
+        ) as HTMLTextAreaElement | null;
         const clearBtn = document.getElementById("clear-btn");
+        const inputCounter = document.getElementById("input-counter");
+
+        if (!inputText) return;
 
         const savedText = localStorage.getItem("inputText");
         if (savedText) {
             inputText.value = savedText;
+            updateCounter(savedText, inputCounter); // Update counter on load
         }
 
         inputText.addEventListener("input", () => {
             localStorage.setItem("inputText", inputText.value);
+            updateCounter(inputText.value, inputCounter);
         });
 
         clearBtn?.addEventListener("click", () => {
             inputText.value = "";
             localStorage.removeItem("inputText");
+            updateCounter("", inputCounter);
+            // Manually trigger the input event to update all output areas
             inputText.dispatchEvent(new Event("input"));
         });
     });

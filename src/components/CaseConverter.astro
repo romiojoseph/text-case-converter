@@ -22,6 +22,10 @@ import SettingsModal from "./SettingsModal.astro";
         <button class="tab-link" data-tab="pascal-case">Pascal case</button>
         <button class="tab-link" data-tab="snake-case">Snake case</button>
         <button class="tab-link" data-tab="kebab-case">Kebab case</button>
+        <button class="tab-link" data-tab="dot-case">Dot case</button>
+        <button class="tab-link" data-tab="alternating-case"
+            >Alternating case</button
+        >
     </div>
 
     <div id="sentence-case" class="tab-content active">
@@ -51,6 +55,12 @@ import SettingsModal from "./SettingsModal.astro";
     <div id="kebab-case" class="tab-content">
         <OutputArea label="Kebab case" id="output-kebab-case" />
     </div>
+    <div id="dot-case" class="tab-content">
+        <OutputArea label="Dot case" id="output-dot-case" />
+    </div>
+    <div id="alternating-case" class="tab-content">
+        <OutputArea label="Alternating case" id="output-alternating-case" />
+    </div>
 
     <SettingsModal />
 </div>
@@ -67,13 +77,27 @@ import SettingsModal from "./SettingsModal.astro";
         let exceptionWords: string[] = [];
         let removeSpecialCharsEnabled = false;
         let specialCharsList: string[] = [];
+        let alternatingCaseMode = "word";
+
+        function updateCounter(
+            text: string,
+            counterElement: HTMLElement | null,
+        ) {
+            if (!counterElement) return;
+            const charCount = text.length;
+            const wordCount =
+                text.trim() === "" ? 0 : text.trim().split(/\s+/).length;
+            counterElement.textContent = `Characters: ${charCount}, Words: ${wordCount}`;
+        }
 
         function setOutputValue(id: string, value: string) {
             const element = document.getElementById(
                 id,
             ) as HTMLTextAreaElement | null;
+            const counterElement = document.getElementById(`${id}-counter`);
             if (element) {
                 element.value = value;
+                updateCounter(value, counterElement);
             }
         }
 
@@ -91,6 +115,8 @@ import SettingsModal from "./SettingsModal.astro";
             specialCharsList = (localStorage.getItem("specialCharsList") || "")
                 .split("\n")
                 .filter(Boolean);
+            alternatingCaseMode =
+                localStorage.getItem("alternatingCaseMode") || "word";
         }
 
         function removeSpecialChars(text: string): string {
@@ -121,9 +147,9 @@ import SettingsModal from "./SettingsModal.astro";
             setOutputValue("output-pascal-case", toPascalCase(cleanedText));
             setOutputValue("output-snake-case", toSnakeCase(cleanedText));
             setOutputValue("output-kebab-case", toKebabCase(cleanedText));
+            setOutputValue("output-dot-case", toDotCase(cleanedText));
+            setOutputValue("output-alternating-case", toAlternatingCase(text));
         }
-
-        // --- All Conversion Functions ---
 
         function applyExceptions(str: string, exceptions: string[]): string {
             let tempStr = str;
@@ -185,12 +211,32 @@ import SettingsModal from "./SettingsModal.astro";
             return str.trim().replace(/\s+/g, "-").toLowerCase();
         }
 
-        // --- Event Listeners ---
+        function toDotCase(str: string): string {
+            return str.trim().replace(/\s+/g, ".").toLowerCase();
+        }
+
+        function toAlternatingCase(str: string): string {
+            if (alternatingCaseMode === "character") {
+                return str
+                    .split("")
+                    .map((char, i) =>
+                        i % 2 === 0 ? char.toLowerCase() : char.toUpperCase(),
+                    )
+                    .join("");
+            }
+            return str
+                .split(" ")
+                .map((word, i) =>
+                    i % 2 === 0 ? word.toLowerCase() : word.toUpperCase(),
+                )
+                .join(" ");
+        }
 
         loadSettings();
         convertText();
 
         inputText?.addEventListener("input", convertText);
+
         document.addEventListener("settingsUpdated", () => {
             loadSettings();
             convertText();

@@ -5,6 +5,7 @@ export interface Props {
 }
 
 const { label, id } = Astro.props;
+const counterId = `${id}-counter`;
 ---
 
 <div class="output-area">
@@ -13,6 +14,7 @@ const { label, id } = Astro.props;
         <textarea id={id} readonly></textarea>
         <button class="copy-btn" data-target={id}>Copy</button>
     </div>
+    <div id={counterId} class="counter-info">Characters: 0, Words: 0</div>
 </div>
 
 <script>
@@ -23,22 +25,20 @@ const { label, id } = Astro.props;
         copyBtns.forEach((btn) => {
             btn.addEventListener("click", () => {
                 const targetId = btn.getAttribute("data-target");
-                if (!targetId) return; // Exit if the data-target attribute is missing
+                if (!targetId) return;
 
                 const outputText = document.getElementById(
                     targetId,
                 ) as HTMLTextAreaElement | null;
 
-                // Check if the element exists and has a select method
                 if (outputText && typeof outputText.select === "function") {
                     outputText.select();
                     navigator.clipboard.writeText(outputText.value).then(() => {
-                        // Show notification on successful copy
                         if (notification) {
                             notification.classList.add("show");
                             setTimeout(() => {
                                 notification.classList.remove("show");
-                            }, 3000); // Hide after 3 seconds
+                            }, 2000);
                         }
                     });
                 }
