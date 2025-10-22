@@ -12,9 +12,13 @@ const counterId = `${id}-counter`;
     <label for={id}>{label}</label>
     <div class="output-wrapper">
         <textarea id={id} readonly></textarea>
-        <button class="copy-btn" data-target={id}>Copy</button>
     </div>
-    <div id={counterId} class="counter-info">Characters: 0, Words: 0</div>
+    <div class="div-wrapper">
+        <div id={counterId} class="counter-info">Characters: 0, Words: 0</div>
+        <button class="copy-btn" data-target={id}
+            ><i class="ph-fill ph-copy-simple"></i>Copy</button
+        >
+    </div>
 </div>
 
 <script>
