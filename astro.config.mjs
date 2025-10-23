@@ -7,5 +7,5 @@ import { defineConfig } from 'astro/config';
 export default defineConfig({
     site: 'https://romiojoseph.github.io',
     // The base needs to be the full subfolder path
-    base: '/open-source/text-case-converter',
+    base: '/text-case-converter',
 });
