@@ -1,8 +1,11 @@
+// astro.config.mjs
+
 // @ts-check
 import { defineConfig } from 'astro/config';
 
 // https://astro.build/config
 export default defineConfig({
     site: 'https://romiojoseph.github.io',
-    base: '/text-case-converter',
+    // The base needs to be the full subfolder path
+    base: '/open-source/text-case-converter',
 });

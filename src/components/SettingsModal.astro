@@ -76,6 +76,10 @@
 </div>
 
 <script>
+    // --- THIS IS THE CORRECTED IMPORT PATH ---
+    // The path is now relative to the project's `src` directory.
+    import exceptionsData from "/src/exceptions.json?raw";
+
     document.addEventListener("DOMContentLoaded", () => {
         const modal = document.getElementById(
             "settings-modal",
@@ -141,22 +145,16 @@
             const specialChars = localStorage.getItem("specialCharsList");
 
             if (!commonWords || !exceptionWords || !specialChars) {
-                fetch("/exceptions.json")
-                    .then((response) => response.json())
-                    .then((data) => {
-                        commonWordsTextarea.value = data.commonWords.join(",");
-                        exceptionWordsTextarea.value =
-                            data.exceptionWords.join(",");
-                        specialCharsTextarea.value =
-                            data.specialCharacters.join("\n");
-                    });
+                const data = JSON.parse(exceptionsData);
+                commonWordsTextarea.value = data.commonWords.join(",");
+                exceptionWordsTextarea.value = data.exceptionWords.join(",");
+                specialCharsTextarea.value = data.specialCharacters.join("\n");
             } else {
                 commonWordsTextarea.value = commonWords;
                 exceptionWordsTextarea.value = exceptionWords;
                 specialCharsTextarea.value = specialChars;
             }
 
-            // Default to 'true' (checked) if the setting doesn't exist yet
             commonWordsCheckbox.checked =
                 localStorage.getItem("commonWordsEnabled") !== "false";
             exceptionWordsCheckbox.checked =
